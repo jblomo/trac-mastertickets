@@ -284,9 +284,16 @@ class MasterTicketsModule(Component):
             tkt = link.tkt
             node = g[tkt.id]
             if label_summary:
-                node['label'] = u'#%s %s' % (tkt.id, tkt['summary'])
+                wrapped = [[]]
+                # wrap to ~ 20 characters to improve graph display
+                for w in tkt['summary'].split():
+                    wrapped.append([w]) if sum(map(len, wrapped[-1])) >= 20 else wrapped[-1].append(w)
+
+                node['label'] = u'#%s %s' % (tkt.id, '\\n'.join(' '.join(line)
+                    for line in wrapped))
             else:
                 node['label'] = u'#%s' % tkt.id
+            node['label'] += u"\\n%s" % tkt['owner']
             node['fillcolor'] = tkt['status'] == 'closed' and self.closed_color or self.opened_color
             node['URL'] = req.href.ticket(tkt.id)
             node['alt'] = u'Ticket #%s' % tkt.id
